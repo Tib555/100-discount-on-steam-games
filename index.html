@@ -6,17 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --card-background: rgba(35, 35, 45, 0.6);
+            --blur-effect: blur(20px);
+            --border-color: rgba(255, 255, 255, 0.15);
+            --accent-color: #6a5af9;
+            --hover-accent-color: #5848d8;
+        }
+
+        /* --- Анимации --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes particle-up {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(-80px); opacity: 0; }
+        }
+
         /* --- Общие стили --- */
         body {
             font-family: 'Manrope', sans-serif;
             margin: 0;
-            color: #fff;
+            color: #f0f0f0;
+            background-color: #111; /* Фон на случай, если видео не загрузится */
             overflow-x: hidden;
         }
 
-        /* --- Контейнер для видеофона --- */
+        /* --- Видеофон --- */
         .video-background {
             position: fixed;
             top: 0;
@@ -25,129 +45,156 @@
             height: 100%;
             z-index: -1;
             overflow: hidden;
+            background: #111;
         }
 
         #bg-video {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Заполняет всё пространство, обрезая лишнее */
+            object-fit: cover;
+            filter: brightness(0.6); /* Слегка затемняем видео для читаемости текста */
         }
         
-        /* --- Основной контейнер контента --- */
+        /* --- Основной контейнер --- */
         .main-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* Центрируем карточку по вертикали */
             padding: 40px 20px;
             min-height: 100vh;
             box-sizing: border-box;
         }
 
-        /* --- Карточка с эффектом стекла --- */
+        /* --- Улучшенная карточка с эффектом стекла --- */
         .glass-card {
-            background: rgba(22, 22, 22, 0.45); /* Полупрозрачный фон */
-            backdrop-filter: blur(15px); /* Размытие фона - ключевой эффект! */
-            -webkit-backdrop-filter: blur(15px); /* Для поддержки в Safari */
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            position: relative; /* Необходимо для позиционирования частиц */
+            background: var(--card-background);
+            backdrop-filter: var(--blur-effect);
+            -webkit-backdrop-filter: var(--blur-effect);
+            border-radius: 24px;
+            border: 1px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             width: 100%;
             max-width: 800px;
-            padding: 30px;
+            padding: 40px;
             box-sizing: border-box;
+            overflow: hidden; /* Скрываем частицы, выходящие за пределы */
+            animation: fadeIn 0.8s ease-out forwards;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 3em;
             margin: 0;
             font-weight: 700;
+            letter-spacing: -1px;
         }
         
         .header p {
             font-size: 1.1em;
-            margin-top: 5px;
+            margin-top: 8px;
             color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
         }
 
         #totalcount {
-            font-weight: 700;
+            color: #fff;
         }
 
-        /* --- Стили для списка игр --- */
+        /* --- Улучшенный список игр --- */
         #listcontent {
             display: flex;
             flex-direction: column;
-            gap: 15px; /* Пространство между карточками игр */
+            gap: 15px;
         }
         
         .game-item {
-            background: rgba(40, 40, 40, 0.5);
-            border-radius: 10px;
-            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: background 0.3s, transform 0.3s;
+            opacity: 0; /* Изначально невидимы для анимации */
+            transform: translateY(15px);
+        }
+
+        .game-item.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .game-item:hover {
-            background: rgba(50, 50, 50, 0.7);
-            transform: translateY(-3px);
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.02);
         }
 
         .game-title {
             font-size: 1.1em;
-            font-weight: 400;
+            font-weight: 500;
             margin-right: 20px;
         }
 
         .shop-button {
-            background: #5865F2; /* Цвет в стиле Discord */
+            background: var(--accent-color);
             color: #fff;
             text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 10px 22px;
+            border-radius: 10px;
             font-weight: 700;
             transition: background 0.3s;
-            white-space: nowrap; /* Чтобы текст не переносился */
+            white-space: nowrap;
         }
         
         .shop-button:hover {
-            background: #4752C4;
+            background: var(--hover-accent-color);
         }
 
         /* --- Подвал --- */
         .footer {
-            margin-top: 30px;
+            margin-top: 35px;
             text-align: center;
             font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.6);
         }
         
-        #uptime {
-            color: #fff;
-            font-weight: 700;
-        }
-
         .github-link {
             display: inline-block;
             margin-top: 15px;
-            color: #fff;
+            color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             transition: color 0.3s;
         }
         
         .github-link:hover {
-            color: #5865F2;
+            color: var(--accent-color);
         }
         
-        .github-link svg {
-            vertical-align: middle;
+        /* --- Анимация частиц --- */
+        .particles-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            pointer-events: none; /* Чтобы не мешали кликам */
+        }
+
+        .particle {
+            position: absolute;
+            bottom: 0;
+            background: var(--accent-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particle-up 5s infinite ease-in;
         }
 
     </style>
@@ -157,7 +204,6 @@
     <div class="video-background">
         <video autoplay muted loop playsinline id="bg-video">
             <source src="https://assets.mixkit.co/videos/preview/mixkit-liquid-gradient-background-39688-large.mp4" type="video/mp4">
-            Ваш браузер не поддерживает тег video.
         </video>
     </div>
 
@@ -173,59 +219,87 @@
             
             <div class="footer">
                 <p>Последнее обновление (UTC+8): <span id="uptime">...</span></p>
-                <a class="github-link" href="https://github.com/InJeCTrL/NeedFree">
+                <a class="github-link" href="https://github.com/InJeCTrL/NeedFree" target="_blank">
                     <span style="vertical-align: middle;">View on GitHub</span>
-                    <svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-mark-github" aria-hidden="true" fill="currentColor"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
                 </a>
             </div>
+            
+            <div class="particles-container"></div>
         </div>
     </div>
     
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
-        function showlist() {
-            $.ajax({
-                type: "get",
-                // Добавляем кэш-бастер, чтобы JSON файл не кэшировался браузером
-                url: "./free_goods_detail.json?v=" + new Date().getTime(),
-                success: function(data) {
-                    $('#totalcount').text(data["total_count"]);
-                    $('#uptime').text(data["update_time"]);
-                    
-                    // Очищаем старый список перед обновлением
-                    $('#listcontent').empty();
-                    
-                    if (data["free_list"].length > 0) {
-                        for (var i = 0; i < data["free_list"].length; ++i) {
-                            var gameName = data["free_list"][i][0];
-                            var gameUrl = data["free_list"][i][1];
-                            
-                            // Создаем новую карточку для игры
-                            var gameItemHtml = 
-                                "<div class='game-item'>" +
-                                    "<span class='game-title'>" + gameName + "</span>" +
-                                    "<a href='" + gameUrl + "' target='_blank' class='shop-button'>В Steam</a>" +
-                                "</div>";
-                            
-                            $('#listcontent').append(gameItemHtml);
-                        }
-                    } else {
-                        // Если бесплатных игр нет
-                        var noGamesHtml = 
-                            "<div class='game-item'>" +
-                                "<span class='game-title'>Сейчас бесплатных игр не найдено. Загляните позже!</span>" +
-                            "</div>";
-                        $('#listcontent').append(noGamesHtml);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Ошибка при загрузке данных:", error);
-                     $('#listcontent').html("<div class='game-item'><span class='game-title'>Не удалось загрузить список игр. Попробуйте обновить страницу.</span></div>");
+        $(document).ready(function() {
+            // Функция для создания частиц
+            function createParticles() {
+                var particleContainer = $('.particles-container');
+                var particleCount = 20;
+                for (let i = 0; i < particleCount; i++) {
+                    let particle = $('<div class="particle"></div>');
+                    let size = Math.random() * 3 + 1;
+                    let left = Math.random() * 100;
+                    let animationDuration = Math.random() * 3 + 2; // от 2 до 5 секунд
+                    let animationDelay = Math.random() * 5;
+
+                    particle.css({
+                        'width': size + 'px',
+                        'height': size + 'px',
+                        'left': left + '%',
+                        'animation-duration': animationDuration + 's',
+                        'animation-delay': animationDelay + 's'
+                    });
+                    particleContainer.append(particle);
                 }
-            });
-        }
-        
-        $(document).ready(showlist);
+            }
+
+            // Функция для отображения списка
+            function showlist() {
+                $.ajax({
+                    type: "get",
+                    url: "./free_goods_detail.json?v=" + new Date().getTime(),
+                    success: function(data) {
+                        $('#totalcount').text(data["total_count"]);
+                        $('#uptime').text(data["update_time"]);
+                        
+                        $('#listcontent').empty();
+                        
+                        if (data["free_list"].length > 0) {
+                            data["free_list"].forEach(function(game, index) {
+                                var gameName = game[0];
+                                var gameUrl = game[1];
+                                
+                                var gameItemHtml = 
+                                    "<div class='game-item' style='transition-delay: " + (index * 0.05) + "s'>" +
+                                        "<span class='game-title'>" + gameName + "</span>" +
+                                        "<a href='" + gameUrl + "' target='_blank' class='shop-button'>В Steam</a>" +
+                                    "</div>";
+                                
+                                $('#listcontent').append(gameItemHtml);
+                            });
+
+                            // Запускаем анимацию появления с небольшой задержкой
+                            setTimeout(function() {
+                                $('.game-item').addClass('visible');
+                            }, 100);
+
+                        } else {
+                            var noGamesHtml = 
+                                "<div class='game-item visible'>" +
+                                    "<span class='game-title'>Бесплатных игр не найдено. Загляните позже!</span>" +
+                                "</div>";
+                            $('#listcontent').append(noGamesHtml);
+                        }
+                    },
+                    error: function() {
+                        $('#listcontent').html("<div class='game-item visible'><span class='game-title'>Не удалось загрузить список игр.</span></div>");
+                    }
+                });
+            }
+            
+            showlist();
+            createParticles(); // Запускаем анимацию частиц
+        });
     </script>
 </body>
 </html>
