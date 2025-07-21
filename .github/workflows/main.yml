@@ -1,0 +1,33 @@
+name: Fetch Free Steam Games
+
+on:
+  # Позволяет запускать вручную из вкладки Actions
+  workflow_dispatch:
+  schedule:
+    # Запускает скрипт раз в 12 часов. 
+    # '0 */12 * * *' означает "в 00 минут каждого 12-го часа".
+    - cron: '0 */12 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Python Script
+        run: python NeedFree.py
+
+      - name: Commit and Push if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated: Updated free games list"
+          file_pattern: free_goods_detail.json
